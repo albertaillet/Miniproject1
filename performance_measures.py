@@ -10,40 +10,44 @@ M_rand measures the performance of against the random policy.
 To compute M_rand, we repeat what we did for computing M_opt but by using Opt(1) instead of Opt(0).
 """
 
-def M(policy, epsilon, N=100):
+def M(policy, epsilon, N):
     env = TictactoeEnv()
-    
-    N_win, N_loss = 0, 0
-    for i in range(N):
+    opponent = OptimalPlayer(epsilon=epsilon)
+
+    N_win, N_loss, N_draw = 0, 0, 0
+    for iteration in range(N):
         env.reset()
+        grid, _, __ = env.observe()
+      
+        policy_player = "O"
+        opponent_player = "X"
+        if iteration >= (N // 2):
+            opponent_player, policy_player = policy_player, opponent_player
         
-        policy_player = "X"
-        player = "O"
-        if i < 250:
-            player, policy_player = policy_player, player
-        
-        opt_player = OptimalPlayer(epsilon=epsilon, player=player)
+        policy.player = policy_player
+        opponent.player = opponent_player
 
-        while not env.end:
+        end = False
+        while not end:
             
-            if env.current_player == opt_player.player:
-                move = opt_player.act(grid)
+            if env.current_player == opponent.player:
+                move = opponent.act(grid)
             else:
-                move = policy(grid)
+                move = policy.act(grid)
 
-            grid, _, _ = env.step(move, print_grid=False)
+            grid, end, winner = env.step(move, print_grid=False)
         
-        if env.winner == policy_player:
+        if winner == policy_player:
             N_win += 1
-        else:
+        elif winner == opponent_player:
             N_loss += 1
+        else:
+            N_draw += 1
     
-    assert N_win + N_loss == N
-
     return (N_win - N_loss) / N
 
-def M_opt(policy, N=100):
-    return M(policy, 1, N)
-
-def M_rand(policy, N=100):
+def M_opt(policy, N=500):
     return M(policy, 0, N)
+
+def M_rand(policy, N=500):
+    return M(policy, 1, N)
