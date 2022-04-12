@@ -12,22 +12,22 @@ To compute M_rand, we repeat what we did for computing M_opt but by using Opt(1)
 
 def M(policy, epsilon, N=100):
     env = TictactoeEnv()
-    N_win = 0
-    N_loss = 0
-
+    
+    N_win, N_loss = 0, 0
     for i in range(N):
         env.reset()
         
         policy_player = "X"
         player = "O"
         if i < 250:
-            player = "X"
-        player = OptimalPlayer(epsilon=epsilon, player=player)
+            player, policy_player = policy_player, player
+        
+        opt_player = OptimalPlayer(epsilon=epsilon, player=player)
 
         while not env.end:
             
-            if env.current_player == player.player:
-                move = player.act(grid)
+            if env.current_player == opt_player.player:
+                move = opt_player.act(grid)
             else:
                 move = policy(grid)
 
@@ -37,7 +37,8 @@ def M(policy, epsilon, N=100):
             N_win += 1
         else:
             N_loss += 1
-
+    
+    assert N_win + N_loss == N
 
     return (N_win - N_loss) / N
 
