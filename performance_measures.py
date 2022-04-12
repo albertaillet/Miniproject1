@@ -17,7 +17,7 @@ def M(policy, epsilon, N):
     N_win, N_loss, N_draw = 0, 0, 0
     for iteration in range(N):
         env.reset()
-        grid, _, __ = env.observe()
+        grid, end, _ = env.observe()
       
         policy_player = "O"
         opponent_player = "X"
@@ -27,7 +27,6 @@ def M(policy, epsilon, N):
         policy.player = policy_player
         opponent.player = opponent_player
 
-        end = False
         while not end:
             
             if env.current_player == opponent.player:
