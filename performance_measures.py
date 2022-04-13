@@ -24,7 +24,7 @@ def M(policy, epsilon, N):
         if iteration >= (N // 2):
             opponent_player, policy_player = policy_player, opponent_player
         
-        policy.player = policy_player
+        # policy.player = policy_player
         opponent.player = opponent_player
 
         while not end:
@@ -32,7 +32,7 @@ def M(policy, epsilon, N):
             if env.current_player == opponent.player:
                 move = opponent.act(grid)
             else:
-                move = policy.act(grid)
+                move = policy(grid)
 
             grid, end, winner = env.step(move, print_grid=False)
         
