@@ -1,3 +1,4 @@
+import inspect
 from tic_env import TictactoeEnv, OptimalPlayer
 
 """
@@ -18,13 +19,16 @@ def M(policy, epsilon, N):
     for iteration in range(N):
         env.reset()
         grid, end, _ = env.observe()
-      
-        policy_player = "O"
-        opponent_player = "X"
-        if iteration >= (N // 2):
-            opponent_player, policy_player = policy_player, opponent_player
+
+        if iteration < N // 2:
+            policy_player = "X"
+            opponent_player = "O"
+        elif iteration >= N // 2:
+            policy_player = "O"
+            opponent_player = "X"
         
-        # policy.player = policy_player
+        if isinstance(policy, OptimalPlayer):
+            policy.player = policy_player
         opponent.player = opponent_player
 
         while not end:
@@ -32,7 +36,10 @@ def M(policy, epsilon, N):
             if env.current_player == opponent.player:
                 move = opponent.act(grid)
             else:
-                move = policy(grid)
+                if isinstance(policy, OptimalPlayer):
+                    move = policy.act(grid)
+                else:
+                    move = policy(grid)
 
             grid, end, winner = env.step(move, print_grid=False)
         
