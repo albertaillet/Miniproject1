@@ -1,4 +1,3 @@
-import inspect
 from tic_env import TictactoeEnv, OptimalPlayer
 
 """

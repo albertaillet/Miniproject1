@@ -2,7 +2,6 @@
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
-
 # %matplotlib inline
 
 # %%
@@ -14,6 +13,12 @@ state[2, 1] = -1
 state = np.array([[ 1, 1, 0],
                   [ 0, -1, 0],
                   [-1, 0, 1]])
+
+# %%
+state = np.array([0, 0, 1, 0, -1, -1, 0, 0, 0]).reshape((3, 3))
+
+# %%
+state = np.array([0, 0, -1, 0, 1, 1, 0, 0, 0]).reshape((3, 3))
 
 lim = (-0.5, 2.5)
 msize = 2000
@@ -42,10 +47,3 @@ for i in range(3):
         print(value2player[int(state[i,j])], end=' ' if j<2 else '')
     print('|')
 print()
-
-
-#
-# %%
-
-
-# S_0 -> S_1 -> S_2
