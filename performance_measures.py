@@ -26,21 +26,18 @@ def M(policy, epsilon, N):
             policy_player = "O"
             opponent_player = "X"
         
+        opponent.set_player(opponent_player)
         if isinstance(policy, OptimalPlayer):
-            policy.player = policy_player
-        opponent.player = opponent_player
+            policy.set_player(policy_player)
 
         while not end:
             
             if env.current_player == opponent.player:
                 move = opponent.act(grid)
             else:
-                if isinstance(policy, OptimalPlayer):
-                    move = policy.act(grid)
-                else:
-                    move = policy(grid)
+                move = policy.act(grid)
 
-            grid, end, winner = env.step(move, print_grid=False)
+            grid, end, winner = env.step(move)
         
         if winner == policy_player:
             N_win += 1
