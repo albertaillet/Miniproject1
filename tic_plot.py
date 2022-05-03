@@ -8,13 +8,14 @@ def plot_grid(grid=None, heatmap=None, cmap='jet'):
     plt.xlim((-0.5, 2.5))
     plt.ylim((2.5, -0.5))
 
-    if heatmap is not None:
-        plt.imshow(heatmap, interpolation='none', aspect='equal', cmap=cmap)
     if grid is not None:
         if 1 in grid:
             plt.scatter(*np.nonzero(grid.T==1), marker="x", s=msize, c='k')
         if -1 in grid:
             plt.scatter(*np.nonzero(grid.T==-1), marker="o", s=msize, edgecolors='k', facecolors='none')
+    if heatmap is not None:
+        plt.imshow(heatmap, interpolation='none', aspect='equal', cmap=cmap)
+        plt.colorbar()
         
     plt.xticks(np.arange(0.5, 2.5))
     plt.yticks(np.arange(0.49, 2.5))
