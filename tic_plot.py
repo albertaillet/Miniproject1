@@ -1,8 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def plot_grid(grid=None, heatmap=None, cmap='jet'):
-    lim = (-0.5, 2.5)
+def plot_grid(grid=None, heatmap=None, cmap='jet', clim=(-1,1)):
     msize = 2000
     plt.gca().set_aspect('equal')
     plt.xlim((-0.5, 2.5))
@@ -14,8 +13,12 @@ def plot_grid(grid=None, heatmap=None, cmap='jet'):
         if -1 in grid:
             plt.scatter(*np.nonzero(grid.T==-1), marker="o", s=msize, edgecolors='k', facecolors='none')
     if heatmap is not None:
+        for (i, j), value in np.ndenumerate(heatmap.T):
+            if not np.isnan(value):
+                plt.text(i-0.2, j+0.05, '{:.4f}'.format(value))
         plt.imshow(heatmap, interpolation='none', aspect='equal', cmap=cmap)
         plt.colorbar()
+        plt.clim(clim)
         
     plt.xticks(np.arange(0.5, 2.5))
     plt.yticks(np.arange(0.49, 2.5))
@@ -52,11 +55,18 @@ if __name__ == "__main__":
     plt.show()
 
     state = np.array([0, 0, 1, 0, -1, -1, 0, 0, 0]).reshape((3, 3))
+    map = np.empty((3, 3))
+    map[:] = np.NaN
+    map[state==0] = 0.123456789
+    map[1, 0] = -0.3456789
+    map[0, 1] = 0.56789
     render_grid(state)
-    plot_grid(state, state, cmap='plasma')
+    plot_grid(state, map, cmap='jet')
+    plt.clim(-1, 1)
     plt.show()
 
     state = np.array([0, 0, -1, 0, 1, 1, 0, 0, 0]).reshape((3, 3))
     render_grid(state)
     plot_grid(None, state)
     plt.show()
+# %%
