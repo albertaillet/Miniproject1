@@ -121,3 +121,5 @@ def examples_output_images(model):
     img = imgs.reshape((N*W, H, 3))
     return img
     
+def debug_table(d):
+  return '  \n'.join(['|||||', '|-|-|-|-|']+['|'.join(['', f'player: {p}']+[f"{n}: {o}" for n, o in m.items()]+['']) for p, m in d.items()])
