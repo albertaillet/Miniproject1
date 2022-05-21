@@ -39,7 +39,7 @@ def M(policy, epsilon, N):
             else:
                 move = policy.act(grid)
             
-            valid_move = env.valid_move(move)
+            valid_move = env.check_valid(move)
             if not valid_move and env.current_player == policy_player:
                 winner = opponent_player
                 end = True
