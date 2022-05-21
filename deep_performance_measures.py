@@ -21,40 +21,44 @@ def M(policy, epsilon, N):
         env.reset()
         grid, end, _ = env.observe()
 
-        if iteration < N // 2:
+        if 0 <= iteration < N // 2:
             policy_player = "X"
             opponent_player = "O"
-        elif iteration >= N // 2:
+        elif N // 2 <= iteration < N:
             policy_player = "O"
             opponent_player = "X"
+        else: 
+            raise ValueError(f"iteration must be less than N, itr: {iteration}")
         
         opponent.set_player(opponent_player)
-        if isinstance(policy, (OptimalPlayer, DeepEpsilonGreedy)):
-            
-            policy.set_player(policy_player)
+        policy.set_player(policy_player)
 
         while not end:
-          try:
             if env.current_player == opponent_player:
                 move = opponent.act(grid)
             else:
                 move = policy.act(grid)
-
-            grid, end, winner = env.step(move)
-          except ValueError:
-            winner = opponent_player
-            end = True
-
+            
+            valid_move = env.valid_move(move)
+            if not valid_move and env.current_player == policy_player:
+                winner = opponent_player
+                end = True
+            elif valid_move: 
+                grid, end, winner = env.step(move)   
+            else:
+                raise ValueError("Optimal player took an invalid move")
         
         if winner == policy_player:
             N_win += 1
         elif winner == opponent_player:
             N_loss += 1
-        else:
+        elif winner == None:
             N_draw += 1
+        else:
+            raise ValueError(f"winner must be None, or X or O, winner: {winner}")
 
-    policy.player = original_policy_player
-    
+    policy.set_player(original_policy_player)
+    assert N_win + N_loss + N_draw == N
     return (N_win - N_loss) / N
 
 def M_opt(policy, N=500):
