@@ -17,7 +17,8 @@ def M(policy, epsilon, N, debug):
     original_policy_player = policy.player
 
     N_win, N_loss, N_draw = 0, 0, 0
-    games = {'X': {}, 'O': {}}
+    games = {'X': {'win': 0, 'draw': 0, 'loss': 0}, 
+             'O': {'win': 0, 'draw': 0, 'loss': 0}}
     for iteration in range(N):
         env.reset()
         grid, end, _ = env.observe()
@@ -49,13 +50,15 @@ def M(policy, epsilon, N, debug):
             else:
                 raise ValueError("Optimal player took an invalid move")
         
-        games[policy_player][winner] = games[policy_player].get(winner, 0) + 1
         if winner == policy_player:
             N_win += 1
+            games[policy_player]['win'] += 1
         elif winner == opponent_player:
             N_loss += 1
+            games[policy_player]['loss'] += 1
         elif winner == None:
             N_draw += 1
+            games[policy_player]['draw'] += 1
         else:
             raise ValueError(f"winner must be None, or X or O, winner: {winner}")
 
