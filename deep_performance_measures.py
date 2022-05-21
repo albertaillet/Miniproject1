@@ -11,12 +11,13 @@ M_rand measures the performance of against the random policy.
 To compute M_rand, we repeat what we did for computing M_opt but by using Opt(1) instead of Opt(0).
 """
 
-def M(policy, epsilon, N):
+def M(policy, epsilon, N, debug):
     env = TictactoeEnv()
     opponent = OptimalPlayer(epsilon=epsilon)
     original_policy_player = policy.player
 
     N_win, N_loss, N_draw = 0, 0, 0
+    games = {'X': {}, 'O': {}}
     for iteration in range(N):
         env.reset()
         grid, end, _ = env.observe()
@@ -48,6 +49,7 @@ def M(policy, epsilon, N):
             else:
                 raise ValueError("Optimal player took an invalid move")
         
+        games[policy_player][winner] = games[policy_player].get(winner, 0) + 1
         if winner == policy_player:
             N_win += 1
         elif winner == opponent_player:
@@ -57,12 +59,15 @@ def M(policy, epsilon, N):
         else:
             raise ValueError(f"winner must be None, or X or O, winner: {winner}")
 
+
     policy.set_player(original_policy_player)
     assert N_win + N_loss + N_draw == N
+    if debug:
+        return (N_win - N_loss) / N, games
     return (N_win - N_loss) / N
 
-def M_opt(policy, N=500):
-    return M(policy, 0, N)
+def M_opt(policy, N=500, debug=False):
+    return M(policy, 0, N, debug)
 
-def M_rand(policy, N=500):
-    return M(policy, 1, N)
+def M_rand(policy, N=500, debug=False):
+    return M(policy, 1, N, debug)
