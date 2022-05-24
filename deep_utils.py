@@ -35,27 +35,24 @@ class ReplayBuffer(object):
         return len(self) >= batch_size
 
 # state to tensor
-# def state_to_tensor(state, player):
-#     if player==-1:
-#         opponent_player = 1
-#     elif player==1:
-#         opponent_player = -1
-#     elif p2v[player]==-1:
-#         player = p2v[player]
-#         opponent_player = 1
-#     elif p2v[player]==1:
-#         player = p2v[player]
-#         opponent_player = -1
-#     else:
-#         raise ValueError(f"Player should be 1 or -1, player={player}")
+def state_to_tensor(state, player):
+    if player==-1:
+        opponent_player = 1
+    elif player==1:
+        opponent_player = -1
+    elif p2v[player]==-1:
+        player = p2v[player]
+        opponent_player = 1
+    elif p2v[player]==1:
+        player = p2v[player]
+        opponent_player = -1
+    else:
+        raise ValueError(f"Player should be 1 or -1, player={player}")
 
-#     t = np.zeros((3, 3, 2), dtype=np.float32)
-#     t[:, :, 0] = (state == player)
-#     t[:, :, 1] = (state == opponent_player)
-#     return torch.tensor(t, dtype=torch.float32)
-
-def state_to_tensor(state, _):
-  return torch.tensor(state, dtype=torch.float32)
+    t = np.zeros((3, 3, 2), dtype=np.float32)
+    t[:, :, 0] = (state == player)
+    t[:, :, 1] = (state == opponent_player)
+    return torch.tensor(t, dtype=torch.float32)
 
 
 # Policies
