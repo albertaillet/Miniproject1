@@ -74,7 +74,7 @@ class DeepEpsilonGreedy:
       if random.random() > self.epsilon:
           state = state_to_tensor(state, self.player)
           with torch.no_grad():
-              return self.net(state).max(1).indices.item()
+              return torch.argmax(self.net(state)).item()
       else:
           #return random.randrange(self.n_actions)
           available = np.nonzero(state.flatten() == 0)
