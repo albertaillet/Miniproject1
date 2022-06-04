@@ -139,7 +139,6 @@ class DeepEpsilonGreedy:
                  player: str='X') -> None:
         self.net = net
         self.epsilon = epsilon
-        self.n_actions = n_actions
         self.player = player
     
     def set_epsilon(self, epsilon: float) -> None:
