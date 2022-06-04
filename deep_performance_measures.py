@@ -1,5 +1,4 @@
 from tic_env import TictactoeEnv, OptimalPlayer
-from deep_utils import DeepEpsilonGreedy
 
 """
 M_opt measures the performance of pi against the optimal policy. 
@@ -12,6 +11,27 @@ To compute M_rand, we repeat what we did for computing M_opt but by using Opt(1)
 """
 
 def M(policy, epsilon, N, debug):
+    """Compute the performance of the policy against the an optimal player with a given epsilon
+    
+    Parameters
+    ----------
+    policy : DeepEpsilonGreedy
+        The policy to compute the performance of, should have an act and set_player method
+    epsilon : float
+        The epsilon value to use for the optimal player
+    N : int
+        The number of games to play
+    debug : bool
+        Whether to return the game statistics
+    
+    Returns
+    -------
+    if debug:
+        The performance of the policy and a dictionary with the number of wins, losses, and draws for each player
+        with format: {'X': {'win': 0, 'draw': 0, 'loss': 0}, 
+                      'O': {'win': 0, 'draw': 0, 'loss': 0}}
+    else:
+        The performance of the policy"""
     env = TictactoeEnv()
     opponent = OptimalPlayer(epsilon=epsilon)
     original_policy_player = policy.player
@@ -70,7 +90,9 @@ def M(policy, epsilon, N, debug):
     return (N_win - N_loss) / N
 
 def M_opt(policy, N=500, debug=False):
+    """Compute the performance of the policy against an optimal player"""
     return M(policy, 0, N, debug)
 
 def M_rand(policy, N=500, debug=False):
+    """Compute the performance of the policy against a random player"""
     return M(policy, 1, N, debug)

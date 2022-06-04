@@ -1,41 +1,95 @@
+import string
 import torch
 import random
 import numpy as np
 from collections import namedtuple, deque
 from tic_plot import plot_grid
+from typing import Union
 import matplotlib.pyplot as plt
 
 Transition = namedtuple('Transition', ('state', 'action', 'next_state', 'reward', 'player'))
 p2v = {'X': 1, 'O': -1}
 
-# Replay buffer
-# uses code from https://pytorch.org/tutorials/intermediate/reinforcement_q_learning.html#replay-memory
 
 class ReplayBuffer(object):
+    """
+    A class for the Replay Buffer
+    uses code from https://pytorch.org/tutorials/intermediate/reinforcement_q_learning.html#replay-memory
 
-    def __init__(self, buffer_size, batch_size):
+    Attributes
+    ----------
+    buffer : deque
+        The buffer
+    batch_size : int
+        The batch size used when sampling
+
+    Methods
+    -------
+    push(state, action, next_state, reward, player)
+        Save a transition to the buffer
+    get_batch(batch_size=None)
+        Get a batch of transitions from the buffer
+    __len__()
+        Get the length of the buffer
+    has_one_batch(batch_size=None)
+        Check if the buffer has at least one batch
+    """
+
+    def __init__(self, buffer_size: int, batch_size: int) -> None:
         self.buffer = deque([], maxlen=buffer_size)
         self.batch_size = batch_size
 
-    def push(self, *args):
-        """Save a transition"""
+    def push(self, *args) -> None:
+        """Save a transition to the buffer
+        
+        Parameters
+        ----------
+        *args : Transition
+            Transition agruments: state, action, next_state, reward, player
+        """
         self.buffer.append(Transition(*args))
 
-    def get_batch(self, batch_size=None):
+    def get_batch(self, batch_size=None) -> None:
+        """Get a batch of transitions from the buffer
+
+        Parameters
+        ----------
+        batch_size : int, optional
+            The batch size used when sampling, (the default is None, which uses the buffer's batch size)
+        
+        Returns
+        -------
+        list of Transitions
+        """
         if batch_size is None:
           batch_size = self.batch_size
         return random.sample(self.buffer, batch_size)
 
-    def __len__(self):
+    def __len__(self) -> int:
+        """Get the length of the buffer"""
         return len(self.buffer)
 
-    def has_one_batch(self, batch_size=None):
+    def has_one_batch(self, batch_size=None) -> bool:
+        """Check if the buffer has at least one batch"""
         if batch_size is None:
           batch_size = self.batch_size
         return len(self) >= batch_size
 
-# state to tensor
-def state_to_tensor(state, player):
+def state_to_tensor(state: np.ndarray, player: int) -> torch.Tensor:
+    """Convert a the state represntation of the board the corresponding tensor
+
+    Parameters
+    ----------
+    state : np.ndarray
+        The state
+    player : str or int
+        The player
+    
+    Returns
+    -------
+    torch.Tensor
+        The tensor representation of the state
+    """
     if player==-1:
         opponent_player = 1
     elif player==1:
@@ -58,45 +112,109 @@ def state_to_tensor(state, player):
 # Policies
 
 class DeepEpsilonGreedy:
-    def __init__(self, net, epsilon=0, n_actions=9, player='X'):
+    """Epsilon-greedy policy
+    
+    Attributes
+    ----------
+    net : torch.nn.Module
+        The neural network to use to choose action when exploiting
+    epsilon : float
+        The epsilon value used to determine whether to explore or exploit
+    player : str or int
+        The player to use for the policy, either 'X' or 'O'
+
+    Methods
+    -------
+    set_epsilon(epsilon)
+        Set the epsilon value
+    set_player(player)
+        Set the player to use for the policy
+    act(state)
+        Choose an action given the state of the board
+    """
+
+    def __init__(self, 
+                 net: torch.nn.Module, 
+                 epsilon: float=0, 
+                 player: str='X') -> None:
         self.net = net
         self.epsilon = epsilon
-        self.n_actions = n_actions
         self.player = player
     
-    def set_epsilon(self, epsilon):
+    def set_epsilon(self, epsilon: float) -> None:
+        """Set the epsilon value"""
         self.epsilon = epsilon
 
-    def set_player(self, player):
+    def set_player(self, player: str) -> None:
+        """Set the player to use for the policy"""
         self.player = player
     
-    def act(self, state):
-      if random.random() > self.epsilon:
-          state = state_to_tensor(state, self.player)
-          with torch.no_grad():
-              return torch.argmax(self.net(state)).item()
-      else:
-          #return random.randrange(self.n_actions)
-          available = np.nonzero(state.flatten() == 0)
-          return int(random.choice(available[0]))
+    def act(self, state: np.ndarray) -> int:
+        """Choose an action given the state of the board"""
+        # Explore
+        if random.random() < self.epsilon:
+            available = np.nonzero(state.flatten() == 0)
+            return int(random.choice(available[0]))
+        # Exploit
+        else:
+            state = state_to_tensor(state, self.player)
+            with torch.no_grad():
+                return torch.argmax(self.net(state)).item()
+            
 
 
 class DeepEpsilonGreedyDecreasingExploration(DeepEpsilonGreedy):
+    """Epsilon-greedy policy with decreasing exploration rate
 
-    def __init__(self, net, n_actions=9, player='X', epsilon_min= 0.1, epsilon_max=0.8, n_star=20000):
-        super().__init__(net, n_actions=n_actions, player=player)
+    Attributes
+    ----------
+    See DeepEpsilonGreedy
+    epsilon_min : float
+        The minimum epsilon value to use int decreasing exploration formula
+    epsilon_max : float
+        The maximum epsilon value to use int decreasing exploration formula
+    n_star : int
+        The n* parameter to use in the decreasing exploration formula
+    
+    Methods
+    -------
+    See DeepEpsilonGreedy
+    update_epsilon(n)
+        Update the epsilon value using the decreasing exploration formula depending on the step n
+    """
+
+    def __init__(self, 
+                 net: torch.nn.Module, 
+                 player: str='X', 
+                 epsilon_min: float= 0.1, 
+                 epsilon_max: float=0.8, 
+                 n_star: int=20000) -> None:
+        super().__init__(net, player=player)
         self.epsilon_min = epsilon_min
         self.epsilon_max = epsilon_max
         self.n_star = n_star
 
-    def update_epsilon(self, n):
+    def update_epsilon(self, n: int) -> None:
+        """Update the epsilon value using the decreasing exploration formula depending on the step n"""
         new_epsilon = max(self.epsilon_min, self.epsilon_max * (1 - (n / self.n_star)))
         self.set_epsilon(epsilon=new_epsilon)
 
 
 # Debug 
 
-def examples_output_images(model):
+def examples_output_images(model: torch.nn.Module) -> np.ndarray:
+    """Generate examples of the model's output
+    
+    Parameters
+    ----------
+    model : torch.nn.Module
+        The model to produce the output images from
+        
+    Returns
+    -------
+    Image of the model's outputs for the three specified examples
+    """
+
     examples = [
                 ((0, 0, 0, 0, 0, 0, 0, 0, 0), 1),
                 ((0, -1, -1, 0, 1, 1, 0, 0, 0), 1),
@@ -121,5 +239,18 @@ def examples_output_images(model):
     img = imgs.reshape((N*W, H, 3))
     return img
     
-def debug_table(d):
-  return '  \n'.join(['|||||', '|-|-|-|-|']+['|'.join(['', f'player: {p}']+[f"{n}: {o}" for n, o in m.items()]+['']) for p, m in d.items()])
+def debug_table(d: dict) -> str:
+    """Print a table of the given dictionary
+
+    Parameters
+    ----------
+    d : dict
+        The nested dictionary to print, should have the following structure:
+        {'X': {'win': 0, 'draw': 0, 'loss': 0}, 
+         'O': {'win': 0, 'draw': 0, 'loss': 0}
+    
+    Returns
+    -------
+    Formatted table of the given dictionary
+    """
+    return '  \n'.join(['|||||', '|-|-|-|-|']+['|'.join(['', f'player: {p}']+[f"{n}: {o}" for n, o in m.items()]+['']) for p, m in d.items()])

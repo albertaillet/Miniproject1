@@ -2,6 +2,19 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def plot_grid(grid=None, heatmap=None, cmap='jet', clim=(-1,1)):
+    """Plot a grid of the table
+    
+    Parameters
+    ----------
+    grid : np.array, optional
+        The grid of moves to plot, should only have values in (0, 1, -1), by default None
+    heatmap : np.array, optional
+        The heatmap to plot, by default None
+    cmap : str, optional
+        The colormap to use, by default 'jet'
+    clim : tuple, optional
+        The color limits to use, by default (-1, 1)
+    """
     msize = 2000
     plt.gca().set_aspect('equal')
     plt.xlim((-0.5, 2.5))
@@ -30,6 +43,14 @@ def plot_grid(grid=None, heatmap=None, cmap='jet', clim=(-1,1)):
     plt.grid()
 
 def render_grid(grid):
+    """Prints a ascii representation of the grid
+    
+    Parameters
+    ----------
+    grid : np.array
+        The grid to print
+    """
+    print("\n".join([" ".join(["{:.2f}".format(x) for x in row]) for row in grid]))
     value2player = {0: '-', 1: 'X', -1: 'O'}
     for i in range(3):
         print('|', end='')
@@ -69,4 +90,3 @@ if __name__ == "__main__":
     render_grid(state)
     plot_grid(None, state)
     plt.show()
-# %%

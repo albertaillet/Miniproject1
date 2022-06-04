@@ -11,6 +11,20 @@ To compute M_rand, we repeat what we did for computing M_opt but by using Opt(1)
 """
 
 def M(policy, epsilon, N):
+    """Compute the performance of the policy against the an optimal player with a given epsilon
+    
+    Parameters
+    ----------
+    policy :
+        The policy to compute the performance of, should have an act method
+    epsilon : float
+        The epsilon value to use for the optimal player
+    N : int
+        The number of games to play
+    
+    Returns
+    -------
+    The performance of the policy"""
     env = TictactoeEnv()
     opponent = OptimalPlayer(epsilon=epsilon)
 
@@ -49,7 +63,9 @@ def M(policy, epsilon, N):
     return (N_win - N_loss) / N
 
 def M_opt(policy, N=500):
+    """Compute the performance of the policy against an optimal player"""
     return M(policy, 0, N)
 
 def M_rand(policy, N=500):
+    """Compute the performance of the policy against a random player"""
     return M(policy, 1, N)
