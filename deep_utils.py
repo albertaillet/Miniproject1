@@ -1,15 +1,15 @@
-import string
 import torch
 import random
 import numpy as np
 from collections import namedtuple, deque
 from tic_plot import plot_grid
-from typing import Union
 import matplotlib.pyplot as plt
 
 Transition = namedtuple('Transition', ('state', 'action', 'next_state', 'reward', 'player'))
 p2v = {'X': 1, 'O': -1}
 
+# Replay buffer
+# uses code from https://pytorch.org/tutorials/intermediate/reinforcement_q_learning.html#replay-memory
 
 class ReplayBuffer(object):
     """
@@ -139,6 +139,7 @@ class DeepEpsilonGreedy:
                  player: str='X') -> None:
         self.net = net
         self.epsilon = epsilon
+        self.n_actions = n_actions
         self.player = player
     
     def set_epsilon(self, epsilon: float) -> None:
@@ -149,18 +150,17 @@ class DeepEpsilonGreedy:
         """Set the player to use for the policy"""
         self.player = player
     
-    def act(self, state: np.ndarray) -> int:
-        """Choose an action given the state of the board"""
-        # Explore
-        if random.random() < self.epsilon:
-            available = np.nonzero(state.flatten() == 0)
-            return int(random.choice(available[0]))
-        # Exploit
-        else:
-            state = state_to_tensor(state, self.player)
-            with torch.no_grad():
-                return torch.argmax(self.net(state)).item()
-            
+    def act(self, state) -> int:
+      """Choose an action given the state of the board"""
+      # Exploit
+      if random.random() > self.epsilon:
+          state = state_to_tensor(state, self.player)
+          with torch.no_grad():
+              return torch.argmax(self.net(state)).item()
+      # Explore
+      else:
+          available = np.nonzero(state.flatten() == 0)
+          return int(random.choice(available[0]))
 
 
 class DeepEpsilonGreedyDecreasingExploration(DeepEpsilonGreedy):
